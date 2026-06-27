@@ -1,26 +1,32 @@
 import streamlit as st
 import pandas as pd
+from pybaseball import batting_stats
 
-# Set wide layout like Kasper's app
+# 1. Setup the Dashboard
 st.set_page_config(layout="wide")
+st.title("⚾ Live Home Run Hunter Dashboard")
+st.write("Pulling real-time 2026 Statcast data...")
 
-st.title("⚾ Home Run Hunter Dashboard")
-st.write("Data pipeline test...")
+# 2. The Data Engine (Caching prevents the app from crashing by saving the data memory)
+@st.cache_data
+def load_live_stats():
+    # Pull the live 2026 MLB season stats (players with at least 100 Plate Appearances)
+    # This automatically pulls all metrics FanGraphs has available!
+    stats = batting_stats(2026, qual=100)
+    
+    # Select the specific columns we care about for Home Run Hunting
+    # (ISO = Raw Power, wRC+ = Overall hitting rating)
+    my_hitters = stats[['Name', 'Team', 'PA', 'HR', 'ISO', 'wOBA', 'wRC+']]
+    
+    # Sort by the highest ISO (Isolated Power) to find the biggest HR threats
+    my_hitters = my_hitters.sort_values(by='ISO', ascending=False).head(25)
+    return my_hitters
 
-# Mocking up Kasper's hitter look
-data = {
-    'Hitter': ['TJ Rumfield', 'Edouard Julien', 'Spencer Horwitz'],
-    'Team': ['COL', 'COL', 'PIT'],
-    'Matchup Score': [63.028, 62.838, 62.815],
-    'Test Score': [61.496, 61.464, 60.606],
-    'xwOBA': [0.328, 0.337, 0.333],
-    'SweetSpot%': [41.9, 40.3, 37.9],
-    'LA (Launch Angle)': [19.1, 14.2, 20.2]
-}
-df = pd.DataFrame(data)
+# 3. Load the Data
+df = load_live_stats()
 
-# Apply the green-to-red color heatmap
-styled_df = df.style.background_gradient(cmap='RdYlGn', subset=['Matchup Score', 'Test Score', 'xwOBA', 'SweetSpot%'])
+# 4. Paint the Heatmap (Green = Good, Red = Bad)
+styled_df = df.style.background_gradient(cmap='RdYlGn', subset=['HR', 'ISO', 'wOBA', 'wRC+'])
 
-# Render the table nicely
+# 5. Render the table to the screen
 st.dataframe(styled_df, use_container_width=True)
