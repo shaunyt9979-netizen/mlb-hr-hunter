@@ -13,8 +13,9 @@ def load_statcast_data():
     # Pull the live 2026 Statcast expected stats (minimum 100 plate appearances)
     stats = statcast_batter_expected_stats(2026, minPA=100)
     
-    # Grab the exact columns we scouted, using their weird combined name
-    my_hitters = stats[['last_name, first_name', 'pa', 'est_woba', 'est_slg', 'est_ba']]
+     # Rename that ugly combined column to just 'Player'
+    my_hitters = my_hitters.rename(columns={'last_name, first_name': 'Player'})
+
     
     # Rename that ugly combined column to just 'Player'
     my_hitters = my_hitters.rename(columns={'last_name, first_name': 'Player'})
