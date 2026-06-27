@@ -16,20 +16,20 @@ def load_hitters():
     # Pull exit velocity / batted ball database
     ev_stats = statcast_batter_exitvelo_barrels(2026, minBBE=50)
     
-    # Clean up the batted ball data so we only bring the new metrics to the merge
-    ev_stats_clean = ev_stats[['player_id', 'avg_hit_angle', 'sweet_spot_percent']]
+    # Clean up the batted ball data using the EXACT API column names
+    ev_stats_clean = ev_stats[['player_id', 'avg_hit_angle', 'anglesweetspotpercent']]
     
     # MERGE: Combine both datasets using their unique player_id
     stats = pd.merge(exp_stats, ev_stats_clean, on='player_id', how='inner')
     
-    # Select our new master list of columns
-    hitters = stats[['last_name, first_name', 'pa', 'est_woba', 'est_slg', 'est_ba', 'avg_hit_angle', 'sweet_spot_percent']]
+    # Select our new master list of columns (using the exact API name)
+    hitters = stats[['last_name, first_name', 'pa', 'est_woba', 'est_slg', 'est_ba', 'avg_hit_angle', 'anglesweetspotpercent']]
     
     # Rename columns so they look clean on the dashboard
     hitters = hitters.rename(columns={
         'last_name, first_name': 'Hitter',
         'avg_hit_angle': 'Launch Angle',
-        'sweet_spot_percent': 'Sweet Spot %'
+        'anglesweetspotpercent': 'Sweet Spot %'
     })
     
     return hitters
@@ -63,7 +63,6 @@ df_hitters = df_hitters.sort_values(by='Matchup Score', ascending=False).head(25
 df_hitters = df_hitters[['Hitter', 'Matchup Score', 'Launch Angle', 'Sweet Spot %', 'pa', 'est_woba', 'est_slg', 'est_ba']]
 
 # 6. Paint and Format the Table
-# Lock in 3 decimals for the stats, and add % and ° symbols where needed
 format_dict = {
     'Matchup Score': '{:.3f}',
     'Launch Angle': '{:.1f}°',
@@ -73,7 +72,6 @@ format_dict = {
     'est_ba': '{:.3f}'
 }
 
-# Apply colors and formatting!
 styled_df = df_hitters.style.format(format_dict).background_gradient(
     cmap='RdYlGn', 
     subset=['Matchup Score', 'Sweet Spot %', 'est_woba', 'est_slg']
