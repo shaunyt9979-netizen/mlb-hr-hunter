@@ -52,4 +52,4 @@ styled_df = df_hitters.style.background_gradient(
 
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True)
-Hit ​Commit changes​.​
+
