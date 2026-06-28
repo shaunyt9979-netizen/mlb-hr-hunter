@@ -83,7 +83,7 @@ styled_df = df_hitters.style.format(format_dict).background_gradient(
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True)
 
-# --- LIVE SCOREBOARD SECTION ---
+#  --- LIVE SCOREBOARD SECTION ---
 
 # 1. Get today's date dynamically
 today_date = datetime.datetime.today().strftime('%Y-%m-%d')
@@ -103,22 +103,16 @@ def get_live_schedule():
     try:
         response = requests.get(url, headers=headers)
         data = response.json()
-        try:
-        response = requests.get(url, headers=headers)
-        data = response.json()
         
-        # ADD THIS LINE RIGHT HERE:
+        # This will print the raw API response in the sidebar so we can see why it said "no games"
         st.sidebar.write("DEBUG DATA:", data)
         
-        games_list = []
-
         games_list = []
         # Parse the JSON response
         if 'response' in data and len(data['response']) > 0:
             for game in data['response']:
                 home_team = game['teams']['home']['name']
                 away_team = game['teams']['away']['name']
-                # Clean up the time formatting if needed
                 status = game['status']['long']
                 
                 games_list.append(f"⚾ {away_team} @ {home_team} ({status})")
@@ -135,4 +129,3 @@ todays_games = get_live_schedule()
 
 for game in todays_games:
     st.sidebar.info(game)
-
