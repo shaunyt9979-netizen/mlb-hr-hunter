@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import requests
+import datetime
+
 from pybaseball import statcast_batter_expected_stats, statcast_pitcher_expected_stats, statcast_batter_exitvelo_barrels
 
 # 1. Setup the Dashboard
@@ -79,3 +82,49 @@ styled_df = df_hitters.style.format(format_dict).background_gradient(
 
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True)
+
+# --- LIVE SCOREBOARD SECTION ---
+
+# 1. Get today's date dynamically
+today_date = datetime.datetime.today().strftime('%Y-%m-%d')
+current_year = datetime.datetime.today().year
+
+# 2. The Armored API Call (Caches data for 1 hour)
+@st.cache_data(ttl=3600)
+def get_live_schedule():
+    # MLB is League ID 1 in API-Sports
+    url = f"https://v1.baseball.api-sports.io/games?league=1&season={current_year}&date={today_date}"
+    
+    # Securely pulling your key from the Streamlit vault
+    headers = {
+        'x-apisports-key': st.secrets["API_SPORTS_KEY"]
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        
+        games_list = []
+        # Parse the JSON response
+        if 'response' in data and len(data['response']) > 0:
+            for game in data['response']:
+                home_team = game['teams']['home']['name']
+                away_team = game['teams']['away']['name']
+                # Clean up the time formatting if needed
+                status = game['status']['long']
+                
+                games_list.append(f"⚾ {away_team} @ {home_team} ({status})")
+            return games_list
+        else:
+            return ["No games scheduled for today yet."]
+    except Exception as e:
+        return ["Waiting for schedule data..."]
+
+# 3. Put it in the Sidebar for clean viewing
+st.sidebar.markdown("---")
+st.sidebar.header("📅 Today's Matchups")
+todays_games = get_live_schedule()
+
+for game in todays_games:
+    st.sidebar.info(game)
+
