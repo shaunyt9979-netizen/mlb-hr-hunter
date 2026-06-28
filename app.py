@@ -103,7 +103,15 @@ def get_live_schedule():
     try:
         response = requests.get(url, headers=headers)
         data = response.json()
+        try:
+        response = requests.get(url, headers=headers)
+        data = response.json()
         
+        # ADD THIS LINE RIGHT HERE:
+        st.sidebar.write("DEBUG DATA:", data)
+        
+        games_list = []
+
         games_list = []
         # Parse the JSON response
         if 'response' in data and len(data['response']) > 0:
