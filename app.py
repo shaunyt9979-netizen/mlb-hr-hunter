@@ -186,3 +186,20 @@ if todays_games:
 else:
     st.sidebar.warning("No games found for today.")
     active_game_id = None
+@st.cache_data(ttl=300)
+def get_starting_lineups(game_id):
+    if not game_id:
+        return [], []
+        
+    url = f"https://statsapi.mlb.com/api/v1/game/{game_id}/boxscore"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        # The MLB API returns 'battingOrder' as a list of player IDs (e.g. [592450, 605141...])
+        away_batters = data['teams']['away'].get('battingOrder', [])
+        home_batters = data['teams']['home'].get('battingOrder', [])
+        
+        return away_batters, home_batters
+    except Exception as e:
+        return [], []
