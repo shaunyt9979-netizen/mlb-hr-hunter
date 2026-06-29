@@ -105,7 +105,25 @@ def get_starting_lineups(game_id):
         return active_hitters
     except Exception as e:
         return []
+# In your sidebar section:
+st.sidebar.header("🗓️ Today's Matchups")
+todays_games = get_live_schedule()
 
+if todays_games:
+    # This turns your games into a selectable dropdown list
+    selected_game = st.sidebar.selectbox(
+        "Select Game to Model:",
+        options=todays_games,
+        format_func=lambda x: x["label"]
+    )
+    
+    # These variables now hold the active game data!
+    active_game_id = selected_game["game_id"]
+    away_team_name = selected_game["away_name"]
+    home_team_name = selected_game["home_name"]
+else:
+    st.sidebar.warning("No games found for today.")
+    active_game_id = None
 # --- FILTER BY STARTING LINEUP ---
 if active_game_id:
     with st.spinner(f"Pulling live lineups for {away_team_name} vs {home_team_name}..."):
@@ -211,25 +229,7 @@ def get_live_schedule():
 
 
 
-# In your sidebar section:
-st.sidebar.header("🗓️ Today's Matchups")
-todays_games = get_live_schedule()
 
-if todays_games:
-    # This turns your games into a selectable dropdown list
-    selected_game = st.sidebar.selectbox(
-        "Select Game to Model:",
-        options=todays_games,
-        format_func=lambda x: x["label"]
-    )
-    
-    # These variables now hold the active game data!
-    active_game_id = selected_game["game_id"]
-    away_team_name = selected_game["away_name"]
-    home_team_name = selected_game["home_name"]
-else:
-    st.sidebar.warning("No games found for today.")
-    active_game_id = None
 @st.cache_data(ttl=300)
 def get_starting_lineups(game_id):
     if not game_id:
