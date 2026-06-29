@@ -74,6 +74,38 @@ format_dict = {
     'est_slg': '{:.3f}',
     'est_ba': '{:.3f}'
 }
+@st.cache_data(ttl=300)
+def get_starting_lineups(game_id):
+    if not game_id:
+        return []
+        
+    url = f"https://statsapi.mlb.com/api/v1/game/{game_id}/boxscore"
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        active_hitters = []
+        
+        # Loop through both away and home teams in the boxscore
+        for team in [data['teams']['away'], data['teams']['home']]:
+            batting_order = team.get('battingOrder', [])
+            players_dict = team.get('players', {})
+            
+            for player_id in batting_order:
+                player_key = f"ID{player_id}"
+                if player_key in players_dict:
+                    full_name = players_dict[player_key]['person']['fullName']
+                    
+                    # Convert "Yordan Alvarez" to "Alvarez, Yordan" to match your dataframe!
+                    name_parts = full_name.split(' ')
+                    last_first = f"{name_parts[-1]}, {' '.join(name_parts[:-1])}"
+                    
+                    active_hitters.append(last_first)
+                    
+        return active_hitters
+    except Exception as e:
+        return []
+
 
 styled_df = df_hitters.style.format(format_dict).background_gradient(
     cmap='RdYlGn', 
@@ -189,17 +221,32 @@ else:
 @st.cache_data(ttl=300)
 def get_starting_lineups(game_id):
     if not game_id:
-        return [], []
+        return []
         
     url = f"https://statsapi.mlb.com/api/v1/game/{game_id}/boxscore"
     try:
         response = requests.get(url)
         data = response.json()
         
-        # The MLB API returns 'battingOrder' as a list of player IDs (e.g. [592450, 605141...])
-        away_batters = data['teams']['away'].get('battingOrder', [])
-        home_batters = data['teams']['home'].get('battingOrder', [])
+        active_hitters = []
         
-        return away_batters, home_batters
+        # Loop through both away and home teams in the boxscore
+        for team in [data['teams']['away'], data['teams']['home']]:
+            batting_order = team.get('battingOrder', [])
+            players_dict = team.get('players', {})
+            
+            for player_id in batting_order:
+                player_key = f"ID{player_id}"
+                if player_key in players_dict:
+                    full_name = players_dict[player_key]['person']['fullName']
+                    
+                    # Convert "Yordan Alvarez" to "Alvarez, Yordan" to match your dataframe!
+                    name_parts = full_name.split(' ')
+                    last_first = f"{name_parts[-1]}, {' '.join(name_parts[:-1])}"
+                    
+                    active_hitters.append(last_first)
+                    
+        return active_hitters
     except Exception as e:
-        return [], []
+        return []
+
