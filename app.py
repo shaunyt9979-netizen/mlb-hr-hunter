@@ -105,6 +105,38 @@ def get_starting_lineups(game_id):
         return active_hitters
     except Exception as e:
         return []
+@st.cache_data(ttl=3600)
+def get_live_schedule():
+    # Official MLB endpoint
+    today = datetime.datetime.today().strftime('%Y-%m-%d')
+    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        games_list = []
+        if 'dates' in data and len(data['dates']) > 0:
+            games = data['dates'][0].get('games', [])
+            for game in games:
+                away_team = game['teams']['away']['team']['name']
+                home_team = game['teams']['home']['team']['name']
+                game_id = game.get('gamePk')
+                status = game['status']['detailedState']
+                
+                # We save this as a dictionary so we keep the ID attached to the text
+                games_list.append({
+                    "label": f"⚪ {away_team} @ {home_team} ({status})",
+                    "game_id": game_id,
+                    "away_name": away_team,
+                    "home_name": home_team
+                })
+        return games_list
+    except Exception as e:
+        return []
+
+
+
 # In your sidebar section:
 st.sidebar.header("🗓️ Today's Matchups")
 todays_games = get_live_schedule()
@@ -197,35 +229,7 @@ if batter_id:
         
     st.markdown("---")
     
-@st.cache_data(ttl=3600)
-def get_live_schedule():
-    # Official MLB endpoint
-    today = datetime.datetime.today().strftime('%Y-%m-%d')
-    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
-    
-    try:
-        response = requests.get(url)
-        data = response.json()
-        
-        games_list = []
-        if 'dates' in data and len(data['dates']) > 0:
-            games = data['dates'][0].get('games', [])
-            for game in games:
-                away_team = game['teams']['away']['team']['name']
-                home_team = game['teams']['home']['team']['name']
-                game_id = game.get('gamePk')
-                status = game['status']['detailedState']
-                
-                # We save this as a dictionary so we keep the ID attached to the text
-                games_list.append({
-                    "label": f"⚪ {away_team} @ {home_team} ({status})",
-                    "game_id": game_id,
-                    "away_name": away_team,
-                    "home_name": home_team
-                })
-        return games_list
-    except Exception as e:
-        return []
+
 
 
 
