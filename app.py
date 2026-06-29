@@ -107,7 +107,7 @@ if batter_id:
         st.metric(label="Sample Size (AB)", value=int(splits["At Bats"]))
         
     st.markdown("---")
-One quick heads-up:​ See those placeholder lines at the top (​batter_id = "592450" and ​pitcher_hand = "R")?
+    
 # --- OFFICIAL MLB LIVE SCOREBOARD SECTION ---
 
 # 1. Get today's date dynamically
