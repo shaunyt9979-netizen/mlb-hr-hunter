@@ -167,10 +167,22 @@ def get_live_schedule():
 
 
 
-# 3. Put it in the Sidebar for clean viewing
-st.sidebar.markdown("---")
-st.sidebar.header("📅 Today's Matchups")
+# In your sidebar section:
+st.sidebar.header("🗓️ Today's Matchups")
 todays_games = get_live_schedule()
 
-for game in todays_games:
-    st.sidebar.info(game)
+if todays_games:
+    # This turns your games into a selectable dropdown list
+    selected_game = st.sidebar.selectbox(
+        "Select Game to Model:",
+        options=todays_games,
+        format_func=lambda x: x["label"]
+    )
+    
+    # These variables now hold the active game data!
+    active_game_id = selected_game["game_id"]
+    away_team_name = selected_game["away_name"]
+    home_team_name = selected_game["home_name"]
+else:
+    st.sidebar.warning("No games found for today.")
+    active_game_id = None
