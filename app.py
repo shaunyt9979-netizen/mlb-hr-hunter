@@ -106,6 +106,18 @@ def get_starting_lineups(game_id):
     except Exception as e:
         return []
 
+# --- FILTER BY STARTING LINEUP ---
+if active_game_id:
+    with st.spinner(f"Pulling live lineups for {away_team_name} vs {home_team_name}..."):
+        starting_lineup_names = get_starting_lineups(active_game_id)
+        
+        # Filter your dataframe to ONLY keep rows where the Hitter is in the starting lineup
+        if starting_lineup_names:
+            df_hitters = df_hitters[df_hitters['Hitter'].isin(starting_lineup_names)]
+            
+            if df_hitters.empty:
+                st.warning("Lineups for this game haven't been posted yet! Showing full roster.")
+
 
 styled_df = df_hitters.style.format(format_dict).background_gradient(
     cmap='RdYlGn', 
