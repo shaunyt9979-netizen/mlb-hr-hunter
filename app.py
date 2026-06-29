@@ -83,6 +83,31 @@ styled_df = df_hitters.style.format(format_dict).background_gradient(
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True)
 
+# --- PLAYER SPLIT STAT BOX ---
+
+# 1. Change 'batter_id' to whatever variable name your app uses for the selected player's ID
+# 2. Change 'pitcher_hand' to whatever variable name your app uses for the pitcher's throwing hand ('L' or 'R')
+batter_id = "592450"  # This is a placeholder ID. Swap this out with your actual player selector variable!
+pitcher_hand = "R"    # This is a placeholder hand. Swap this out with your pitcher hand variable!
+
+if batter_id:
+    with st.spinner("Loading split data..."):
+        splits = get_batter_splits(batter_id, pitcher_hand)
+    
+    st.markdown(f"### 📊 Batter Performance vs {pitcher_hand}HP")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric(label="Batting Avg (AVG)", value=str(splits["AVG"]))
+    with col2:
+        st.metric(label="On-Base + Slugging (OPS)", value=str(splits["OPS"]))
+    with col3:
+        st.metric(label="Home Runs (HR)", value=int(splits["HR"]))
+    with col4:
+        st.metric(label="Sample Size (AB)", value=int(splits["At Bats"]))
+        
+    st.markdown("---")
+One quick heads-up:​ See those placeholder lines at the top (​batter_id = "592450" and ​pitcher_hand = "R")?
 # --- OFFICIAL MLB LIVE SCOREBOARD SECTION ---
 
 # 1. Get today's date dynamically
@@ -115,6 +140,35 @@ def get_live_schedule():
             
     except Exception as e:
         return ["Error loading MLB schedule..."]
+
+@st.cache_data
+def get_batter_splits(player_id, pitcher_hand):
+    # 'vl' means vs Left, 'vr' means vs Right in the MLB database
+    sit_code = 'vl' if pitcher_hand == 'L' else 'vr'
+    
+    # The actual, official MLB endpoint for batter splits
+    url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats=statSplits&group=hitting&sitCodes={sit_code}"
+    
+    try:
+        response = requests.get(url)
+        data = response.json()
+        
+        if 'stats' in data and len(data['stats']) > 0:
+            splits = data['stats'][0].get('splits', [])
+            if len(splits) > 0:
+                stats = splits[0].get('stat', {})
+                return {
+                    "AVG": stats.get("avg", ".000"),
+                    "HR": stats.get("homeRuns", 0),
+                    "OPS": stats.get("ops", ".000"),
+                    "At Bats": stats.get("atBats", 0)
+                }
+    except Exception as e:
+        pass
+        
+    # Fallback if the player has no data for that split yet
+    return {"AVG": ".000", "HR": 0, "OPS": ".000", "At Bats": 0}
+
 
 # 3. Put it in the Sidebar for clean viewing
 st.sidebar.markdown("---")
