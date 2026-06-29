@@ -135,38 +135,35 @@ if batter_id:
         
     st.markdown("---")
     
-# --- OFFICIAL MLB LIVE SCOREBOARD SECTION ---
-
-# 1. Get today's date dynamically
-today_date = datetime.datetime.today().strftime('%Y-%m-%d')
-
-# 2. The Free MLB API Call (No keys needed!)
 @st.cache_data(ttl=3600)
 def get_live_schedule():
-    # Official MLB endpoint - 100% free, no limits
-    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today_date}"
+    # Official MLB endpoint
+    today = datetime.datetime.today().strftime('%Y-%m-%d')
+    url = f"https://statsapi.mlb.com/api/v1/schedule?sportId=1&date={today}"
     
     try:
         response = requests.get(url)
         data = response.json()
         
         games_list = []
-        
-        # Check if MLB returned games for today's date
         if 'dates' in data and len(data['dates']) > 0:
             games = data['dates'][0].get('games', [])
             for game in games:
                 away_team = game['teams']['away']['team']['name']
                 home_team = game['teams']['home']['team']['name']
-                status = game['status']['detailedState'] # usually says "Scheduled", "In Progress", or "Final"
+                game_id = game.get('gamePk')
+                status = game['status']['detailedState']
                 
-                games_list.append(f"⚾ {away_team} @ {home_team} ({status})")
-            return games_list
-        else:
-            return ["No games scheduled for today."]
-            
+                # We save this as a dictionary so we keep the ID attached to the text
+                games_list.append({
+                    "label": f"⚪ {away_team} @ {home_team} ({status})",
+                    "game_id": game_id,
+                    "away_name": away_team,
+                    "home_name": home_team
+                })
+        return games_list
     except Exception as e:
-        return ["Error loading MLB schedule..."]
+        return []
 
 
 
