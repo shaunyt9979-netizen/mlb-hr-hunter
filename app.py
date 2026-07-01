@@ -170,9 +170,10 @@ if active_game_id:
 
 
 styled_df = df_hitters.style.format(format_dict).background_gradient(
-    cmap='RdYlGn', 
+    cmap='RdYlGn',
     subset=['Matchup Score', 'Sweet Spot %', 'est_woba', 'est_slg']
-)
+).hide(axis="index")
+
 
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True, hide_index=True)
