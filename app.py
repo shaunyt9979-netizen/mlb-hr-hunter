@@ -63,7 +63,7 @@ df_hitters['Matchup Score'] = df_hitters['est_slg'] + pitcher_slg_allowed
 df_hitters = df_hitters.sort_values(by='Matchup Score', ascending=False).head(25)
 
 # Rearrange columns for maximum visual impact
-df_hitters = df_hitters[['Hitter', 'Matchup Score', 'Launch Angle', 'Sweet Spot %', 'pa', 'est_woba', 'est_slg', 'est_ba']]
+df_hitters = df_hitters[['Hitter', 'player_id', 'Matchup Score', 'Launch Angle', 'Sweet Spot %', 'pa', 'est_woba', 'est_slg', 'est_ba']] 
 
 # 6. Paint and Format the Table
 format_dict = {
