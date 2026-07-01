@@ -175,7 +175,7 @@ styled_df = df_hitters.style.format(format_dict).background_gradient(
 )
 
 # 7. Render to screen
-st.dataframe(styled_df, use_container_width=True)
+st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
 # --- PLAYER SPLIT STAT BOX ---
 
