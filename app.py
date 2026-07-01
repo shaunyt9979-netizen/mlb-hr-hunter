@@ -87,6 +87,7 @@ def get_starting_lineups(game_id):
         active_hitters = []
         
         # Loop through both away and home teams in the boxscore
+        st.write(df_hitters.columns)
         for team in [data['teams']['away'], data['teams']['home']]:
             batting_order = team.get('battingOrder', [])
             players_dict = team.get('players', {})
