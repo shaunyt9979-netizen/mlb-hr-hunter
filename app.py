@@ -173,7 +173,10 @@ if active_game_id:
 styled_df = df_hitters.style.format(format_dict).background_gradient(
     cmap='RdYlGn',
     subset=['Matchup Score', 'Sweet Spot %', 'est_woba', 'est_slg']
-).hide(axis="index")
+).hide(axis="index").hide(subset=['player_id'], axis="columns")
+
+
+
 
 # --- TOP READS CARDS ---
 st.subheader("🔥 Top Reads In This Game")
