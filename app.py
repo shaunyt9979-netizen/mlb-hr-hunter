@@ -174,6 +174,25 @@ styled_df = df_hitters.style.format(format_dict).background_gradient(
     subset=['Matchup Score', 'Sweet Spot %', 'est_woba', 'est_slg']
 ).hide(axis="index")
 
+# --- TOP READS CARDS ---
+st.subheader("🔥 Top Reads In This Game")
+
+# Sort your dataframe to find the 4 highest Matchup Scores
+top_4_hitters = df_hitters.sort_values(by="Matchup Score", ascending=False).head(4)
+
+# Create 4 equal columns across the screen
+cols = st.columns(4)
+
+# Loop through our top 4 guys and drop a metric card in each column
+for (index, row), col in zip(top_4_hitters.iterrows(), cols):
+    with col:
+        # We use st.metric to create that clean, commercial card look
+        st.metric(
+            label=row["Hitter"],
+            value=f"{row['Matchup Score']:.3f}",
+            delta=f"Sweet Spot: {row['Sweet Spot %']:.1f}%",
+            delta_color="normal"
+        )
 
 # 7. Render to screen
 st.dataframe(styled_df, use_container_width=True, hide_index=True)
