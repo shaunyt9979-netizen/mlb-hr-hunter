@@ -201,8 +201,18 @@ st.dataframe(styled_df, use_container_width=True, hide_index=True)
 
 # 1. Change 'batter_id' to whatever variable name your app uses for the selected player's ID
 # 2. Change 'pitcher_hand' to whatever variable name your app uses for the pitcher's throwing hand ('L' or 'R')
-batter_id = "592450"  # This is a placeholder ID. Swap this out with your actual player selector variable!
-pitcher_hand = "R"    # This is a placeholder hand. Swap this out with your pitcher hand variable!
+# Create a dropdown to pick a player from the current game's lineup
+selected_hitter_name = st.selectbox("🔍 Select Hitter for Deep Dive:", df_hitters['Hitter'].tolist())
+
+# Grab that specific player's data row
+player_row = df_hitters[df_hitters['Hitter'] == selected_hitter_name].iloc[0]
+
+# Dynamically get their MLB ID 
+# (IMPORTANT: Make sure 'batter_id' perfectly matches the ID column name in your dataset! It might be 'batter' or 'player_id')
+dynamic_batter_id = str(player_row['batter_id']) 
+
+# For now, let's keep pitcher hand as "R" (Right-handed), but you can wire this up to the opposing pitcher later!
+pitcher_hand = "R" 
 @st.cache_data
 def get_batter_splits(player_id, pitcher_hand):
     # 'vl' means vs Left, 'vr' means vs Right in the MLB database
